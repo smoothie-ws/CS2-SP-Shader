@@ -6,21 +6,18 @@ import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 
 RowLayout {
+    id: root
     spacing: 10
     opacity: enabled ? 1.0 : 0.3
     
-    property string label
-    property real minValue: 0.25
-    property real maxValue: 0.50
-    property real firstValue: 0.1
-    property real secondValue: 0.0
-    property real step: 0.1
-    property bool isFloat: false
+    property alias text: label.text
+    property alias from: control.from
+    property alias to: control.to
+    property alias minValue: control.first.value
+    property alias maxValue: control.second.value
+    property alias stepSize: control.stepSize
+    property var range: [minValue, maxValue]
     property int precision: 2
-
-    Component.onCompleted: {
-        defaults = [firstValue, secondValue];
-    }
 
     ColumnLayout {
         spacing: 5
@@ -30,81 +27,69 @@ RowLayout {
             spacing: 10
 
             AlgLabel {
-                text: label
-            }
-
-            // kind of a spacer
-            Item {
+                id: label
                 Layout.fillWidth: true
             }
 
-            AlgTextInput {
-                Layout.preferredWidth: 40
-                id: minValueText
-                text: parseFloat(firstValue).toFixed(precision)
-                validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
-                horizontalAlignment: TextInput.AlignRight
+            Row {
+                spacing: 10
 
-                onActiveFocusChanged: {
-                    if (focus)
-                    {
-                        selectAll()
+                AlgTextInput {
+                    width: 40
+                    id: minValueText
+                    text: parseFloat(root.minValue).toFixed(precision)
+                    validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
+                    horizontalAlignment: TextInput.AlignRight
+
+                    onActiveFocusChanged: {
+                        if (focus)
+                        {
+                            selectAll()
+                        }
+                        else {
+                            deselect()
+                        }
                     }
-                    else {
-                        deselect()
+                    onEditingFinished: {
+                        root.minValue = parseFloat(text).toFixed(precision)
                     }
                 }
-                onEditingFinished: {
-                    firstValue = parseFloat(text).toFixed(precision)
+
+                AlgTextInput {
+                    width: 40
+                    id: maxValueText
+                    text: parseFloat(root.maxValue).toFixed(precision)
+                    validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
+                    horizontalAlignment: TextInput.AlignRight
+
+                    onActiveFocusChanged: {
+                        if (focus)
+                        {
+                            selectAll()
+                        }
+                        else {
+                            deselect()
+                        }
+                    }
+                    onEditingFinished: {
+                        root.maxValue = parseFloat(text).toFixed(precision)
+                    }
                 }
             }
 
-            AlgTextInput {
-                Layout.preferredWidth: 40
-                id: maxValueText
-                text: parseFloat(secondValue).toFixed(precision)
-                validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
-                horizontalAlignment: TextInput.AlignRight
-
-                onActiveFocusChanged: {
-                    if (focus)
-                    {
-                        selectAll()
-                    }
-                    else {
-                        deselect()
-                    }
-                }
-                onEditingFinished: {
-                    secondValue = parseFloat(text).toFixed(precision)
-                }
-            }
         }
 
         RowLayout {
             Layout.fillWidth: true
 
             AlgLabel {
-                text: minValue
+                text: root.from
             }
 
             RangeSlider {
                 id: control
                 Layout.fillWidth: true
-                from: minValue
-                to: maxValue
                 snapMode: RangeSlider.SnapAlways
-                stepSize: step
-                first.value: firstValue
-                second.value: secondValue
-
-                first.onValueChanged: {
-                    firstValue = first.value
-                }
-
-                second.onValueChanged: {
-                    secondValue = second.value
-                }
                 
                 first.handle: Item {
                     x: control.first.visualPosition * control.availableWidth
@@ -119,7 +104,7 @@ RowLayout {
                         color: control.first.pressed ? "#1a8dff" : "#d0d0d0"
                         border.color: "#1a8dff"
                         border.width: control.first.pressed ? 2 : 0
-                        radius: 180
+                        radius: width
                     }
                 }
 
@@ -136,7 +121,7 @@ RowLayout {
                         color: control.second.pressed ? "#1a8dff" : "#d0d0d0"
                         border.color: "#1a8dff"
                         border.width: control.second.pressed ? 2 : 0
-                        radius: 180
+                        radius: width
                     }
                 }
 
@@ -174,7 +159,7 @@ RowLayout {
             }
 
             AlgLabel {
-                text: maxValue
+                text: root.to
             }
         }
     }

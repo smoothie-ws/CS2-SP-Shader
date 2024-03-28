@@ -4,6 +4,10 @@ import lib-utils.glsl
 import lib-sampler.glsl
 import lib-normal.glsl
 
+//: metadata {
+//:  "custom-ui":"cs2/main.qml"
+//: }
+
 //- Finish styles:
 #define SO 0 // Solid Color
 #define HY 1 // Hydrographic
@@ -30,53 +34,53 @@ uniform SamplerSparse pearlescent_tex;
 //: param auto channel_user1
 uniform SamplerSparse alpha_tex;
 
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform_specialization bool u_enable_live_preview;
-//: param custom { "default": 4, "visible": false }
+//: param custom { "default": 4 }
 uniform_specialization int u_finish_style;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform_specialization bool u_enable_pbr_validation;
-//: param custom { "default": "gun_grunge", "default_color": [0.5, 0.5, 0.5], "visible": false }
+//: param custom { "default": "gun_grunge", "default_color": [0.5, 0.5, 0.5] }
 uniform sampler2D gun_grunge_sampler;
-//: param custom { "default": "", "default_color": [0.2, 0.2, 0.2], "visible": false }
+//: param custom { "default": "", "default_color": [0.2, 0.2, 0.2] }
 uniform sampler2D default_basecolor_sampler;
-//: param custom { "default": "", "default_color": [0.5, 0.5, 1.0], "visible": false }
+//: param custom { "default": "", "default_color": [0.5, 0.5, 1.0] }
 uniform sampler2D default_normal_sampler;
-//: param custom { "default": "", "default_color": [1.0, 0.3, 1.0], "visible": false }
+//: param custom { "default": "", "default_color": [1.0, 0.3, 1.0] }
 uniform sampler2D default_orm_sampler;
-//: param custom { "default": 78.0, "visible": false }
+//: param custom { "default": 78.0 }
 uniform float u_m_rgb_min;
-//: param custom { "default": 250.0, "visible": false }
+//: param custom { "default": 250.0 }
 uniform float u_m_rgb_max;
-//: param custom { "default": 52.0, "visible": false }
+//: param custom { "default": 52.0 }
 uniform float u_nm_rgb_min;
-//: param custom { "default": 220.0, "visible": false }
+//: param custom { "default": 220.0 }
 uniform float u_nm_rgb_max;
-//: param custom { "default": 0.00, "visible": false }
+//: param custom { "default": 0.00 }
 uniform float u_wear;
-//: param custom { "default": 1, "visible": false }
+//: param custom { "default": 1 }
 uniform vec3 u_base_metal;
 //: param custom { "default": 1, "visible": "false" }
 uniform vec3 u_patina_tint;
-//: param custom { "default": 1, "visible": false }
+//: param custom { "default": 1 }
 uniform vec3 u_patina_wear;
-//: param custom { "default": 1, "visible": false }
+//: param custom { "default": 1 }
 uniform vec3 u_grime;
-//: param custom { "default": 1.00, "visible": false }
+//: param custom { "default": 1.00 }
 uniform float u_tex_scale;
-//: param custom { "default": 0.00, "visible": false }
+//: param custom { "default": 0.00 }
 uniform float u_pearl_scale;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform bool u_use_pearl_mask;
-//: param custom { "default": 0.6, "visible": false }
+//: param custom { "default": 0.6 }
 uniform float u_paint_roughness;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform bool u_use_roughness_tex;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform bool u_use_normal_map;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform bool u_use_material_mask;
-//: param custom { "default": true, "visible": false }
+//: param custom { "default": true }
 uniform bool u_use_ao_tex;
 
 vec3 hueShift(vec3 col, float factor) {

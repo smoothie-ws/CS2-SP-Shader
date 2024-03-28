@@ -178,9 +178,7 @@ Window {
 
             Rectangle {
                 id: previousColor
-                anchors.bottom: currentColor.bottom
-                anchors.right: currentColor.right
-                anchors.top: currentColor.top
+                height: currentColor.height
                 width: currentColor.width * 0.3
             }
             

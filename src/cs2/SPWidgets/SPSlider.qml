@@ -6,15 +6,15 @@ import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 
 RowLayout {
+    id: root
     spacing: 10
     opacity: enabled ? 1.0 : 0.3
-    
-    property string label
-    property real minValue: 0.25
-    property real maxValue: 0.50
-    property real controlValue: 0.1
-    property real step: 0.1
-    property bool isFloat: false
+
+    property alias text: label.text
+    property alias from: control.from
+    property alias to: control.to
+    property alias value: control.value
+    property alias stepSize: control.stepSize
     property int precision: 2
 
     ColumnLayout {
@@ -25,18 +25,13 @@ RowLayout {
             spacing: 10
 
             AlgLabel {
-                text: label
-            }
-
-            // kind of a spacer
-            Item {
                 Layout.fillWidth: true
+                id: label
             }
 
             AlgTextInput {
                 Layout.preferredWidth: 40
-                id: valueText
-                text: parseFloat(controlValue).toFixed(precision)
+                text: parseFloat(value).toFixed(precision)
                 validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
                 horizontalAlignment: TextInput.AlignRight
 
@@ -49,8 +44,9 @@ RowLayout {
                         deselect()
                     }
                 }
+
                 onEditingFinished: {
-                    controlValue = Math.max(minValue, Math.min(parseFloat(text).toFixed(precision), maxValue))
+                    root.value = Math.max(interval[0], Math.min(parseFloat(text).toFixed(precision), interval[1]))
                 }
             }
         }
@@ -59,21 +55,13 @@ RowLayout {
             Layout.fillWidth: true
 
             AlgLabel {
-                text: minValue
+                text: root.from
             }
 
             Slider {
                 id: control
                 Layout.fillWidth: true
-                from: minValue
-                to: maxValue
                 snapMode: RangeSlider.SnapAlways
-                stepSize: step
-                value: controlValue
-
-                onValueChanged: {
-                    controlValue = value
-                }
                 
                 handle: Item {
                     x: control.visualPosition * control.availableWidth
@@ -126,7 +114,7 @@ RowLayout {
             }
 
             AlgLabel {
-                text: maxValue
+                text: root.to
             }
         }
     }
