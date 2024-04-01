@@ -1,12 +1,11 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
-import QtQuick.Window 2.15
 
 RowLayout {
     id: root
 
     property alias color: colorPicker.color
-    property var arrayColor: [color.r, color.g, color.b]
+    property alias arrayColor: colorPicker.arrayColor
 
     SPButton {
         id: control
@@ -44,5 +43,17 @@ RowLayout {
 
     SPColorPicker {
         id: colorPicker
+
+        property var arrayColor: [0, 0, 0]
+
+        onArrayColorChanged: {
+            if (!visible) {
+                color = Qt.rgba(arrayColor[0], arrayColor[1], arrayColor[2]);
+            }
+        }
+
+        onColorChanged: {
+            arrayColor = [color.r, color.g, color.b];
+        }
     }
 }

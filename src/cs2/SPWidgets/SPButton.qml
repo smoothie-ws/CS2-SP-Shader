@@ -4,10 +4,10 @@ import QtQuick.Layouts 1.3
 
 Button {
     id: root
-
+    clip: true
     padding: 4
     opacity: enabled ? 1.0 : 0.3
-
+    
     background: Rectangle {
         anchors.fill: parent
         color: root.hovered ? "#333333" : "#2d2d2d"
@@ -18,6 +18,21 @@ Button {
 
     contentItem: RowLayout {
         spacing: 8
+
+        Item {
+            visible: root.checkable
+            height: parent.height
+            width: height
+            x: parent.width - width
+
+            Rectangle {
+                anchors.fill: parent
+                anchors.margins: 5
+                radius: width
+                scale: root.checked ? 1 : 1.5
+                color: root.checked ? Qt.rgba(1, 1, 1, 0.65) : Qt.rgba(0, 0, 0, 0.35)
+            }
+        }
 
         Image {
             source: root.icon.source

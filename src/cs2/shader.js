@@ -10,6 +10,7 @@ function protectSignalRetroAction(qmlComponent, fn) {
 
 function connect(qmlComponent, propertyKey, shaderParameter) {
   qmlComponent[propertyKey] = shaderParameter.value;
+
   qmlComponent[propertyKey+"Changed"].connect(protectSignalRetroAction(qmlComponent, function() {
       shaderParameter.value = qmlComponent[propertyKey];
   }));

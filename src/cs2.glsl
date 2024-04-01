@@ -59,13 +59,13 @@ uniform float u_nm_rgb_max;
 //: param custom { "default": 0.00 }
 uniform float u_wear;
 //: param custom { "default": 1 }
-uniform vec3 u_base_metal;
+uniform vec3 u_col0;
 //: param custom { "default": 1, "visible": "false" }
-uniform vec3 u_patina_tint;
+uniform vec3 u_col1;
 //: param custom { "default": 1 }
-uniform vec3 u_patina_wear;
+uniform vec3 u_col2;
 //: param custom { "default": 1 }
-uniform vec3 u_grime;
+uniform vec3 u_col3;
 //: param custom { "default": 1.00 }
 uniform float u_tex_scale;
 //: param custom { "default": 0.00 }
@@ -187,7 +187,7 @@ void shade(V2F inputs) {
         rORM = mix(pORM, dORM, cutoffMask);
 
         // compute extra colors
-        uPatinaTint = clamp(u_patina_tint, u_wear, 1.0);
+        uPatinaTint = clamp(u_col1, u_wear, 1.0);
 
     } else {
         rColor = getBaseColor(basecolor_tex, inputs.sparse_coord);

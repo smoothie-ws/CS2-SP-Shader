@@ -7,182 +7,199 @@ import AlgWidgets.Style 2.0
 import "SPWidgets"
 import "shader.js" as Shader
 
-
 Rectangle {
     id: root
     color: AlgStyle.background.color.mainWindow
     height: mainLayout.height
-    
-    Component.onCompleted: {
-        
+    onHeightChanged: {
+        if (height != mainLayout.height) {
+            height = Qt.binding(function() {return mainLayout.height});
+        }
+    }
+
+    property int shaderID: 0;
+
+    function displayShaderParameters(shaderId) {
+        try {
+            root.shaderID = shaderId;
+        }
+        catch(e) {
+            alg.log.error(e.message);
+        }
+    }
+
+    PainterPlugin {
+        onComputationStatusChanged: {
+            var meshUrl = alg.project.lastImportedMeshUrl();
+            var meshName = meshUrl.split("/").pop().split(".")[0];
+            weaponModel.control.currentIndex = weaponModel.control.model.findIndex(weapon => weapon.value === meshName)
+        }
     }
 
     ColumnLayout {
         id: mainLayout
         width: parent.width
 
-        Rectangle {
-            color: "#212121"
-            radius: 10
+        SPParameterGroup {
             Layout.fillWidth: true
-            Layout.preferredHeight: 50
+            shaderID: root.shaderID
+            expandable: false
+            padding: 10
+            background: Rectangle {
+                color: Qt.rgba(1, 1, 1, 0.05)
+                border.width: 1
+                border.color: Qt.rgba(1, 1, 1, 0.1)
+                radius: 10
+            }
 
-            RowLayout {
-                anchors.fill: parent
-                anchors.centerIn: parent
-                anchors.margins: 15
-
+            SPParameter {
+                id: enableLivePreview
+                Layout.fillWidth: true
+                text: "Live Preview"
+                parameter: "u_enable_live_preview"
+                key: "checked"
+                resettable: false
                 SPButton {
-                    id: enableLivePreview
-                    Layout.alignment: Qt.AlignCenter
-                    text: "Live Preview"
                     checkable: true
+                    text: checked ? "Enabled" : "Disabled"
                 }
+            }
 
+            SPParameter {
+                Layout.fillWidth: true
+                text: "PBR Validation"
+                parameter: "u_enable_pbr_validation"
+                key: "checked"
+                resettable: false
                 SPButton {
-                    id: enablePBRValidation
-                    Layout.alignment: Qt.AlignCenter
-                    text: "PBR Validate"
                     checkable: true
+                    text: checked ? "Enabled" : "Disabled"
                 }
             }
         }
 
+        SPSeparator {
+            Layout.fillWidth: true
+        }
+
         ColumnLayout {
+            Layout.bottomMargin: 10
             Layout.fillWidth: true
             spacing: 10
-            enabled: enableLivePreview.checked
+            enabled: enableLivePreview.control.checked
 
-            GridLayout {
-                columns: 2
-                columnSpacing: 15
-                rowSpacing: 10
+            SPParameterGroup {
                 Layout.fillWidth: true
+                shaderID: root.shaderID
+                text: "Common"
 
-                AlgLabel {
+                SPParameter {
+                    id: weaponModel
                     text: "Weapon"
-                }
-                AlgComboBox {
-                    Layout.fillWidth: true
-                    model: [
-                        { text: "AK-47", value: 0 },
-                        { text: "AUG", value: 1 },
-                        { text: "AWP", value: 2 },
-                        { text: "PP-Bizon", value: 3 },
-                        { text: "CZ75-Auto", value: 4 },
-                        { text: "Desert Eagle", value: 5 },
-                        { text: "Dual Berettas", value: 6 },
-                        { text: "FAMAS", value: 7 },
-                        { text: "Five-SeveN", value: 8 },
-                        { text: "Glock-18", value: 9 },
-                        { text: "G3SG1", value: 10 },
-                        { text: "Galil AR", value: 11 },
-                        { text: "MAC-10", value: 12 },
-                        { text: "M249", value: 13 },
-                        { text: "M4A1-S", value: 14 },
-                        { text: "M4A4", value: 15 },
-                        { text: "MAG-7", value: 16 },
-                        { text: "MP5-SD", value: 17 },
-                        { text: "MP7", value: 18 },
-                        { text: "MP9", value: 19 },
-                        { text: "Negev", value: 20 },
-                        { text: "Nova", value: 21 },
-                        { text: "P2000", value: 22 },
-                        { text: "P250", value: 23 },
-                        { text: "P90", value: 24 },
-                        { text: "R8 Revolver", value: 25 },
-                        { text: "Sawed-Off", value: 26 },
-                        { text: "SCAR-20", value: 27 },
-                        { text: "SG 553", value: 28 },
-                        { text: "SSG 08", value: 29 },
-                        { text: "Tec-9", value: 30 },
-                        { text: "UMP-45", value: 31 },
-                        { text: "USP-S", value: 32 },
-                        { text: "XM1014", value: 33 },
-                        { text: "Zeus x27", value: 34 }
-                    ]
-                    textRole: "text"
+                    AlgComboBox {
+                        model: [
+                            { text: "AK-47", value: "ak47" },
+                            { text: "AUG", value: "aug" },
+                            { text: "AWP", value: "awp" },
+                            { text: "PP-Bizon", value: "bizon" },
+                            { text: "CZ75-Auto", value: "cz75a" },
+                            { text: "Desert Eagle", value: "deagle" },
+                            { text: "Dual Berettas", value: "elite" },
+                            { text: "FAMAS", value: "famas" },
+                            { text: "Five-SeveN", value: "fiveseven" },
+                            { text: "Glock-18", value: "glock18" },
+                            { text: "G3SG1", value: "g3sg1" },
+                            { text: "Galil AR", value: "galilar" },
+                            { text: "MAC-10", value: "mac10" },
+                            { text: "M249", value: "m249" },
+                            { text: "M4A1-S", value: "m4a1_silencer" },
+                            { text: "M4A4", value: "m4a4" },
+                            { text: "MAG-7", value: "mag7" },
+                            { text: "MP5-SD", value: "mp5sd" },
+                            { text: "MP7", value: "mp7" },
+                            { text: "MP9", value: "mp9" },
+                            { text: "Negev", value: "negev" },
+                            { text: "Nova", value: "nova" },
+                            { text: "P2000", value: "hkp2000" },
+                            { text: "P250", value: "p250" },
+                            { text: "P90", value: "p90" },
+                            { text: "R8 Revolver", value: "revolver" },
+                            { text: "Sawed-Off", value: "sawedoff" },
+                            { text: "SCAR-20", value: "scar20" },
+                            { text: "SG 553", value: "sg553" },
+                            { text: "SSG 08", value: "ssg08" },
+                            { text: "Tec-9", value: "tec9" },
+                            { text: "UMP-45", value: "ump45" },
+                            { text: "USP-S", value: "usp_silencer" },
+                            { text: "XM1014", value: "xm1014" },
+                            { text: "Zeus x27", value: "taser" }
+                        ]
+                        textRole: "text"
+                        valueRole: "value"
+                    }
                 }
 
-                AlgLabel {
+                SPParameter {
+                    id: finishStyle
                     text: "Finish Style"
+                    parameter: "u_finish_style"
+                    key: "currentIndex"
+                    AlgComboBox {
+                        model: [
+                            { text: "Solid Color", value: 0 },
+                            { text: "Hydrographic", value: 1 },
+                            { text: "Spray Paint", value: 2 },
+                            { text: "Anodized", value: 3 },
+                            { text: "Anodized Multicolored", value: 4 },
+                            { text: "Anodized Airbrushed", value: 5 },
+                            { text: "Custom Paint Job", value: 6 },
+                            { text: "Patina", value: 7 },
+                            { text: "Gunsmith", value: 8 }
+                        ]
+                        textRole: "text"
+                        valueRole: "value"
+                    }
                 }
-                AlgComboBox {
-                    Layout.fillWidth: true
-                    model: [
-                        { text: "Solid Color", value: 1 },
-                        { text: "Hydrographic", value: 2 },
-                        { text: "Spray Paint", value: 3 },
-                        { text: "Anodized", value: 4 },
-                        { text: "Anodized Multicolored", value: 5 },
-                        { text: "Anodized Airbrushed", value: 6 },
-                        { text: "Custom Paint Job", value: 7 },
-                        { text: "Patina", value: 8 },
-                        { text: "Gunsmith", value: 9 }
-                    ]
-                    textRole: "text"
-                }
-            }
 
-            AlgGroupWidget {
-                text: "Wear"
-                activeScopeBorder: true
-                toggled: true
+                SPSeparator { }
 
-                GridLayout {
-                    columns: 2
-                    columnSpacing: 15
-                    rowSpacing: 10
-
+                SPParameter {
+                    parameter: "u_wear"
+                    key: "value"
                     SPSlider {
-                        id: wearAmount
                         text: "Wear Amount"
-                        from: wearLimits.minValue.toFixed(2)
-                        to: wearLimits.maxValue.toFixed(2)
+                        from: wearLimits.minValue
+                        to: wearLimits.maxValue
                         stepSize: 0.01
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                }
 
-                    SPRangeSlider {
-                        id: wearLimits
-                        text: "Wear Limits"
-                        from: 0
-                        to: 1
-                        minValue: 0
-                        maxValue: 1
+                SPParameter {
+                    parameter: "u_tex_scale"
+                    key: "value"
+                    SPSlider {
+                        text: "Texture Scale"
+                        from: -10
+                        to: 10
                     }
+                }
+
+                SPParameter {
+                    text: "Ignore Weapon Size Scale:"
+                    key: "checked"
                     SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
+                        checkable: true
+                        text: checked ? "Yes" : "No"
                     }
                 }
             }
 
-            AlgGroupWidget {
+            SPParameterGroup {
+                Layout.fillWidth: true
+                shaderID: root.shaderID
                 text: "Texture Placement"
-                activeScopeBorder: true
-                toggled: true
 
-                GridLayout {
-                    columns: 2
-                    columnSpacing: 15
-                    rowSpacing: 10
-
-                    SPSlider {
-                        id: texScale
-                        text: "Texture Scale"
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
-                    
+                SPParameter {
                     SPRangeSlider {
                         text: "Texture Rotation"
                         from: -360
@@ -190,12 +207,9 @@ Rectangle {
                         minValue: 0
                         maxValue: 0
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                }
 
+                SPParameter {
                     SPRangeSlider {
                         text: "Texture Offset X"
                         from: -1
@@ -203,12 +217,9 @@ Rectangle {
                         minValue: 0
                         maxValue: 0
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                }
 
+                SPParameter {
                     SPRangeSlider {
                         text: "Texture Offset Y"
                         from: -1
@@ -216,166 +227,154 @@ Rectangle {
                         minValue: 0
                         maxValue: 0
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
                 }
             }
 
-            AlgGroupWidget {
+            SPParameterGroup {
+                Layout.fillWidth: true
+                shaderID: root.shaderID
+                visible: finishStyle.control.currentIndex != 6
                 text: "Color"
-                activeScopeBorder: true
-                toggled: true
 
-                GridLayout {
-                    columns: 3
-                    columnSpacing: 15
-                    rowSpacing: 10
+                SPParameter {
+                    text: finishStyle.control.currentIndex > 6 ? "Base Metal" : "Base Coat"
+                    parameter: "u_col0"
+                    key: "arrayColor"
+                    SPColorButton { }
+                }
 
-                    AlgLabel {
-                        text: "Base Metal"
-                    }
-                    SPColorButton {
-                        id: colBaseMetal
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                SPParameter {
+                    visible: finishStyle.control.currentIndex != 3
+                    text: finishStyle.control.currentIndex > 6 ? "Patina Tint" : "Red Channel"
+                    parameter: "u_col1"
+                    key: "arrayColor"
+                    SPColorButton { }
+                }
 
-                    AlgLabel {
-                        text: "Patina Tint"
-                    }
-                    SPColorButton {
-                        id: colPatinaTint
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                SPParameter {
+                    visible: finishStyle.control.currentIndex != 3
+                    text: finishStyle.control.currentIndex > 6 ? "Patina Wear" : "Green Channel"
+                    parameter: "u_col2"
+                    key: "arrayColor"
+                    SPColorButton { }
+                }
 
-                    AlgLabel {
-                        text: "Patina Wear"
-                    }
-                    SPColorButton {
-                        id: colPatinaWear
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
-
-                    AlgLabel {
-                        text: "Grime"
-                    }
-                    SPColorButton {
-                        id: colGrime
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                SPParameter {
+                    visible: finishStyle.control.currentIndex != 3
+                    text: finishStyle.control.currentIndex > 6 ? "Grime" : "Blue Channel"
+                    parameter: "u_col3"
+                    key: "arrayColor"
+                    SPColorButton { }
                 }
             }
 
-            AlgGroupWidget {
+            SPParameterGroup {
+                Layout.fillWidth: true
+                shaderID: root.shaderID
                 text: "Effects"
-                activeScopeBorder: true
-                toggled: true
 
-                GridLayout {
-                    columns: 2
-                    columnSpacing: 15
-                    rowSpacing: 10
+                SPParameter {
+                    id: wearLimits
 
+                    property real minValue: 0.0
+                    property real maxValue: 1.0
+
+                    SPRangeSlider {
+                        text: "Wear Limits"
+                        from: 0
+                        to: 1
+                        minValue: 0
+                        maxValue: 1
+                        onMinValueChanged: wearLimits.minValue = minValue.toFixed(2)
+                        onMaxValueChanged: wearLimits.maxValue = maxValue.toFixed(2)
+                    }
+                }
+
+                SPSeparator { }
+
+                SPParameter {
+                    text: "Pearlescent Mask"
+                    parameter: "u_use_pearl_mask"
+                    key: "checked"
+                    SPButton {
+                        checkable: true
+                        text: checked ? "Use" : "Do not use"
+                    }
+                }
+
+                SPParameter {
+                    parameter: "u_pearl_scale"
+                    key: "value"
                     SPSlider {
                         text: "Pearlescent Scale"
                         from: -6
                         to: 6
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
+                }
 
+                SPSeparator { }
+
+                SPParameter {
+                    id: useRoughnessTexture
+                    property bool checked: true
+                    text: "Roughness Texture"
+                    parameter: "u_use_roughness_tex"
+                    key: "checked"
+                    SPButton {
+                        checkable: true
+                        text: checked ? "Use" : "Do not use"
+
+                        onCheckedChanged: {
+                            useRoughnessTexture.checked = checked
+                        }
+                    }
+                }
+                
+                SPParameter {
+                    visible: !useRoughnessTexture.checked
+                    parameter: "u_paint_roughness"
+                    key: "value"
                     SPSlider {
                         text: "Paint Roughness"
                         from: 0
                         to: 1
                     }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
                 }
             }
 
-            AlgGroupWidget {
-                text: "Material Textures"
-                activeScopeBorder: true
-                toggled: true
+            SPParameterGroup {
+                Layout.fillWidth: true
+                shaderID: root.shaderID
+                text: "Advanced"
+                toggled: false
 
-                GridLayout {
-                    columns: 2
-                    columnSpacing: 15
-                    rowSpacing: 10
-
-                    AlgCheckBox {
-                        Layout.fillWidth: true
-                        text: "Pearlescent Mask"
-                    }
+                SPParameter {
+                    text: "Normal Map"
+                    parameter: "u_use_normal_map"
+                    key: "checked"
                     SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
+                        checkable: true
+                        text: checked ? "Use" : "Do not use"
                     }
+                }
 
-                    AlgCheckBox {
-                        Layout.fillWidth: true
-                        text: "Roughness Texture"
-                    }
+                SPParameter {
+                    text: "Material Mask"
+                    parameter: "u_use_material_mask"
+                    key: "checked"
                     SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
+                        checkable: true
+                        text: checked ? "Use" : "Do not use"
                     }
+                }
 
-                    AlgCheckBox {
-                        Layout.fillWidth: true
-                        text: "Normal Map"
-                    }
+                SPParameter {
+                    text: "Ambient Occlusion"
+                    parameter: "u_use_ao_tex"
+                    key: "checked"
                     SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
-
-                    AlgCheckBox {
-                        Layout.fillWidth: true
-                        text: "Material Mask"
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
-                    }
-
-                    AlgCheckBox {
-                        Layout.fillWidth: true
-                        text: "Ambient Occlusion"
-                    }
-                    SPButton {
-                        icon.source: "icons/icon_cycle.png"
-                        icon.width: 14
-                        icon.height: 14
+                        checkable: true
+                        text: checked ? "Use" : "Do not use"
                     }
                 }
             }

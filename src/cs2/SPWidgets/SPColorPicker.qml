@@ -17,13 +17,14 @@ Window {
     minimumHeight: 225
     maximumHeight: 500
 
-    property color color
+    property alias color: currentColor.color
 
     function clamp(value, min, max) {
         return Math.min(Math.max(value, min), max);
     }
     
     onVisibleChanged: {
+        color.hsvHue = clamp(color.hsvHue, 0, 1);
         previousColor.color = color;
     }
 
@@ -112,7 +113,6 @@ Window {
                 Layout.fillHeight: true
                 Layout.minimumWidth: 10
                 rotation: 180
-                property alias value: root.color.hsvHue
 
                 LinearGradient {
                     anchors.fill: parent
@@ -131,7 +131,7 @@ Window {
 
                 Item {
                     x: 0 - width
-                    y: clamp(hueSlider.value * hueSlider.height, 0, hueSlider.height) - height / 2
+                    y: clamp(root.color.hsvHue * hueSlider.height, 0, hueSlider.height) - height / 2
                     width: 5
                     height: 10
 
@@ -155,11 +155,11 @@ Window {
                     anchors.fill: parent
 
                     onPressed: {
-                        hueSlider.value = clamp(mouse.y / hueSlider.height, 0.0, 1.0);
+                        root.color.hsvHue = clamp(mouse.y / hueSlider.height, 0.0, 1.0);
                     }
 
                     onPositionChanged: {
-                        hueSlider.value = clamp(mouse.y / hueSlider.height, 0.0, 1.0);
+                        root.color.hsvHue = clamp(mouse.y / hueSlider.height, 0.0, 1.0);
                     }
                 }
             }
@@ -172,8 +172,6 @@ Window {
                 Layout.minimumWidth: 50
                 Layout.maximumWidth: 100
                 Layout.minimumHeight: 25
-
-                color: root.color
             }
 
             Rectangle {
