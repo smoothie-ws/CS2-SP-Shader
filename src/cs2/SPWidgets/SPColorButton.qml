@@ -28,7 +28,7 @@ RowLayout {
         Rectangle {
             id: previewArea
             anchors.fill: parent
-            radius: 5
+            radius: 15
             border.color: "#454545"
             border.width: 2
             color: root.color

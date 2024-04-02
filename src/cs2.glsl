@@ -33,7 +33,6 @@ uniform SamplerSparse curvature_tex;
 uniform SamplerSparse pearlescent_tex;
 //: param auto channel_user1
 uniform SamplerSparse alpha_tex;
-
 //: param custom { "default": true }
 uniform_specialization bool u_enable_live_preview;
 //: param custom { "default": 4 }

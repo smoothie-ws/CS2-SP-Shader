@@ -66,6 +66,7 @@ Rectangle {
             }
 
             SPParameter {
+                id: enablePBRValidation
                 Layout.fillWidth: true
                 text: "PBR Validation"
                 parameter: "u_enable_pbr_validation"
@@ -96,7 +97,7 @@ Rectangle {
                 SPParameter {
                     id: weaponModel
                     text: "Weapon"
-                    AlgComboBox {
+                    SPComboBox {
                         model: [
                             { text: "AK-47", value: "ak47" },
                             { text: "AUG", value: "aug" },
@@ -144,7 +145,7 @@ Rectangle {
                     text: "Finish Style"
                     parameter: "u_finish_style"
                     key: "currentIndex"
-                    AlgComboBox {
+                    SPComboBox {
                         model: [
                             { text: "Solid Color", value: 0 },
                             { text: "Hydrographic", value: 1 },

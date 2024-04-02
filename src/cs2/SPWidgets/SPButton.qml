@@ -28,8 +28,9 @@ Button {
                 anchors.fill: parent
                 anchors.margins: 1
                 radius: width
-                color: root.checked ? "#cfcfcf" : Qt.rgba(0, 0, 0, 0.35)
-                border.width: root.checked ? 4 : 0
+                scale: root.hovered ? 1.3 : 1
+                color: root.checked ? "#cfcfcf" : (root.hovered ? Qt.rgba(1, 1, 1, 0.1) : Qt.rgba(0, 0, 0, 0.35))
+                border.width: 4
                 border.color: Qt.rgba(0, 0, 0, 0.35)
             }
         }

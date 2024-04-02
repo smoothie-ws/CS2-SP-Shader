@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
+import QtGraphicalEffects 1.0
 import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 
@@ -8,7 +9,8 @@ ColumnLayout {
     opacity: enabled ? 1.0 : 0.5
     spacing: 5
     property Component background: Rectangle {
-        radius: 10; clip: true
+        radius: 10
+        clip: true
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.rgba(1, 1, 1, 0.05) }
             GradientStop { position: 20 / height; color: Qt.rgba(1, 1, 1, 0.05) }
@@ -16,9 +18,10 @@ ColumnLayout {
         }
     }
 
-    Item {
-        width: root.width; height: root.height
-        Loader { anchors.fill: parent; sourceComponent: background }
+    Loader {
+        width: root.width
+        height: root.height
+        sourceComponent: background 
     }
 
     default property alias children: __contentItem.children
