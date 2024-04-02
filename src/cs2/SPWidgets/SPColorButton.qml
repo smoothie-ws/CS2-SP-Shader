@@ -3,7 +3,6 @@ import QtQuick.Layouts 1.3
 
 RowLayout {
     id: root
-
     property alias color: colorPicker.color
     property alias arrayColor: colorPicker.arrayColor
 
@@ -43,7 +42,6 @@ RowLayout {
 
     SPColorPicker {
         id: colorPicker
-
         property var arrayColor: [0, 0, 0]
 
         onArrayColorChanged: {

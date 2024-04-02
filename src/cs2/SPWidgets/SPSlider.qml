@@ -34,20 +34,8 @@ RowLayout {
                 text: parseFloat(value).toFixed(precision)
                 validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
                 horizontalAlignment: TextInput.AlignRight
-
-                onActiveFocusChanged: {
-                    if (focus)
-                    {
-                        selectAll()
-                    }
-                    else {
-                        deselect()
-                    }
-                }
-
-                onEditingFinished: {
-                    root.value = Math.max(interval[0], Math.min(parseFloat(text).toFixed(precision), interval[1]))
-                }
+                onActiveFocusChanged: focus ? selectAll() : deselect()
+                onEditingFinished: root.value = Math.max(interval[0], Math.min(parseFloat(text).toFixed(precision), interval[1]))
             }
         }
 

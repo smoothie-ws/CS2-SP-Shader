@@ -5,11 +5,9 @@ import Painter 1.0
 import AlgWidgets 2.0
 import "../shader.js" as Shader
 
-
 Item {
     id: root
     implicitHeight: __contentItem.height
-
     default property alias children: __contentItem.sourceComponent
     property alias control: __contentItem.item
     property alias text: label.text
@@ -22,11 +20,8 @@ Item {
     property real availableWidth: width - (__separatorX + (resettable ? resetButton.width : 0))
     property bool isChanged: false
     property alias resettable: resetButton.visible
-    
-    AlgLabel {
-        id: label
-        y: __contentItem.height / 2 - height / 2
-    }
+
+    AlgLabel { id: label; y: __contentItem.height / 2 - height / 2 }
 
     Loader {
         id: __contentItem
@@ -35,26 +30,22 @@ Item {
         onLoaded: {
             if (key !== "" && parameter !== "") {
                 Shader.connect(item, key, alg.shaders.parameter(shaderID, parameter));
-
                 root.defaultValue = item[key];
-                item[key + "Changed"].connect(function(){
-                    root.isChanged = root.defaultValue != item[key];
-                })
+                item[key + "Changed"].connect(function(){ root.isChanged = root.defaultValue != item[key]; })
             }
         }
     }
 
     SPButton {
         id: resetButton
+        Layout.alignment: Qt.AlignRight
         x: root.width - width
         y: __contentItem.height / 2 - height / 2
-        Layout.alignment: Qt.AlignRight
-        enabled: (root.key !== null && root.defaultValue !== null)
+        enabled: root.isChanged && root.key !== "" && parameter !== ""
         icon.source: "../icons/icon_cycle.png"
         icon.width: 14
         icon.height: 14
-        onClicked: {
-            __contentItem.item[root.key] = root.defaultValue
-        }
+        background: null
+        onClicked: __contentItem.item[root.key] = root.defaultValue
     }
 }

@@ -7,13 +7,12 @@ Button {
     clip: true
     padding: 4
     opacity: enabled ? 1.0 : 0.3
-    
     background: Rectangle {
         anchors.fill: parent
         color: root.hovered ? "#333333" : "#2d2d2d"
         border.color: root.checked ? "#378ef0" : "#4e4e4e"
         border.width: 1
-        radius: 5
+        radius: 15
     }
 
     contentItem: RowLayout {
@@ -24,13 +23,14 @@ Button {
             height: parent.height
             width: height
             x: parent.width - width
-
+            
             Rectangle {
                 anchors.fill: parent
-                anchors.margins: 5
+                anchors.margins: 1
                 radius: width
-                scale: root.checked ? 1 : 1.5
-                color: root.checked ? Qt.rgba(1, 1, 1, 0.65) : Qt.rgba(0, 0, 0, 0.35)
+                color: root.checked ? "#cfcfcf" : Qt.rgba(0, 0, 0, 0.35)
+                border.width: root.checked ? 4 : 0
+                border.color: Qt.rgba(0, 0, 0, 0.35)
             }
         }
 
@@ -39,6 +39,7 @@ Button {
             sourceSize.width: root.icon.width
             sourceSize.height: root.icon.height
             visible: root.icon.source !== ""
+            scale: root.hovered ? 1.1 : 1
             opacity: root.hovered ? 1.0 : 0.75
         }
 
