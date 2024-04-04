@@ -77,6 +77,18 @@ Rectangle {
                     text: checked ? "Enabled" : "Disabled"
                 }
             }
+
+            SPParameter {
+                id: pbrLimits
+                visible: enablePBRValidation.control.checked
+                SPRangeSlider {
+                    text: "PBR Limits"
+                    stepSize: 1
+                    precision: 0
+                    from: 0
+                    to: 255
+                }
+            }
         }
 
         SPSeparator {
@@ -97,6 +109,7 @@ Rectangle {
                 SPParameter {
                     id: weaponModel
                     text: "Weapon"
+
                     SPComboBox {
                         model: [
                             { text: "AK-47", value: "ak47" },
@@ -145,6 +158,7 @@ Rectangle {
                     text: "Finish Style"
                     parameter: "u_finish_style"
                     key: "currentIndex"
+
                     SPComboBox {
                         model: [
                             { text: "Solid Color", value: 0 },
@@ -169,8 +183,8 @@ Rectangle {
                     key: "value"
                     SPSlider {
                         text: "Wear Amount"
-                        from: wearLimits.minValue
-                        to: wearLimits.maxValue
+                        from: wearLimits.control.minValue
+                        to: wearLimits.control.maxValue
                         stepSize: 0.01
                     }
                 }
@@ -277,17 +291,12 @@ Rectangle {
                 SPParameter {
                     id: wearLimits
 
-                    property real minValue: 0.0
-                    property real maxValue: 1.0
-
                     SPRangeSlider {
                         text: "Wear Limits"
                         from: 0
                         to: 1
                         minValue: 0
                         maxValue: 1
-                        onMinValueChanged: wearLimits.minValue = minValue.toFixed(2)
-                        onMaxValueChanged: wearLimits.maxValue = maxValue.toFixed(2)
                     }
                 }
 

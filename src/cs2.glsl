@@ -47,14 +47,8 @@ uniform sampler2D default_basecolor_sampler;
 uniform sampler2D default_normal_sampler;
 //: param custom { "default": "", "default_color": [1.0, 0.3, 1.0] }
 uniform sampler2D default_orm_sampler;
-//: param custom { "default": 78.0 }
-uniform float u_m_rgb_min;
-//: param custom { "default": 250.0 }
-uniform float u_m_rgb_max;
-//: param custom { "default": 52.0 }
-uniform float u_nm_rgb_min;
-//: param custom { "default": 220.0 }
-uniform float u_nm_rgb_max;
+//: param custom { "default": [90, 250] }
+uniform ivec2 u_pbr_limits;
 //: param custom { "default": 0.00 }
 uniform float u_wear;
 //: param custom { "default": 1 }
@@ -197,12 +191,7 @@ void shade(V2F inputs) {
 
     if (u_enable_pbr_validation)
     {   
-        vec3 res = vec3(0.0);
-        if (rORM.b < 0.5) {
-            res = validateLuminance(rColor, u_nm_rgb_min, u_nm_rgb_max);
-        } else {
-            res = validateLuminance(rColor, u_m_rgb_min, u_m_rgb_max);
-        }
+        vec3 res = validateLuminance(rColor, u_pbr_limits.x, u_pbr_limits.y);
         rColor = mix((res.r > 0.0 || res.b > 0.0) ? vec3(0.0) : rColor, rColor, cutoffMask);
         emissiveColorOutput(mix(res, vec3(0.0), cutoffMask));
     }

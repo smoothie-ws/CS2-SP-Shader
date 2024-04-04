@@ -60,22 +60,45 @@ ColumnLayout {
         ColumnLayout {
             id: __contentItem
             Layout.fillWidth: true
+
             Component.onCompleted: {
-                var maxSeparatorX = 0;
+                var currentGroup = [];
+                var maxSeparatorXForGroup = 0;
+
                 for (var i = 0; i < __contentItem.children.length; ++i) {
                     var child = __contentItem.children[i];
                     child.Layout.fillWidth = true;
-                    if (child.toString().indexOf("SPParameter") !== -1) {
+
+                    if (child.toString().indexOf("SPParameter") !== -1 && child.__separatorX !== 0) {
                         child.shaderID = root.shaderID;
-                        if (child.__separatorX > maxSeparatorX) {
-                            maxSeparatorX = child.__separatorX;
+                        currentGroup.push(child);
+                    } else if (currentGroup.length > 0) {
+                        maxSeparatorXForGroup = 0;
+                        for (var j = 0; j < currentGroup.length; ++j) {
+                            var groupChild = currentGroup[j];
+                            if (groupChild.__separatorX > maxSeparatorXForGroup) {
+                                maxSeparatorXForGroup = groupChild.__separatorX;
+                            }
                         }
+                        for (var j = 0; j < currentGroup.length; ++j) {
+                            var groupChild = currentGroup[j];
+                            groupChild.__separatorX = maxSeparatorXForGroup;
+                        }
+                        currentGroup = [];
                     }
                 }
-                for (var i = 0; i < __contentItem.children.length; ++i) {
-                    var child = __contentItem.children[i];
-                    if (child.toString().indexOf("SPParameter") !== -1) {
-                        child.__separatorX = child.__separatorX == 0 ? 0 : maxSeparatorX;
+
+                if (currentGroup.length > 0) {
+                    maxSeparatorXForGroup = 0;
+                    for (var j = 0; j < currentGroup.length; ++j) {
+                        var groupChild = currentGroup[j];
+                        if (groupChild.__separatorX > maxSeparatorXForGroup) {
+                            maxSeparatorXForGroup = groupChild.__separatorX;
+                        }
+                    }
+                    for (var j = 0; j < currentGroup.length; ++j) {
+                        var groupChild = currentGroup[j];
+                        groupChild.__separatorX = maxSeparatorXForGroup;
                     }
                 }
             }

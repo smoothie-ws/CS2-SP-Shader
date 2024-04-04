@@ -1,5 +1,6 @@
 import QtQuick 2.7
 import QtQuick.Controls 2.0
+import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 
 
@@ -50,8 +51,13 @@ ComboBox {
             id: listContent
             model: root.model
             anchors.fill: parent
-            clip: true
             spacing: 0
+            clip: true
+
+            ScrollBar.vertical: SPScrollBar {
+                id: scrollBar
+                visible: parent.height < parent.contentHeight
+            }
 
             delegate: Rectangle {
                 id: listItem
@@ -60,14 +66,25 @@ ComboBox {
                 color: Qt.rgba(0, 0, 0, 0)
                 radius: 15
 
+                Rectangle {
+                    width: 5
+                    height: width
+                    radius: width
+                    x: 5
+                    y: parent.height / 2 - height / 2
+                    scale: root.currentIndex == index ? 1.2 : 1
+                    color: root.currentIndex == index ? Qt.rgba(1, 1, 1, 0.75) : Qt.rgba(1, 1, 1, 0.5)
+                }
+
                 Label {
                     id: itemLabel
-                    x: 10 * scale
+                    x: 15
                     y: parent.height / 2 - height / 2
                     text: root.textRole === '' ? modelData : (Array.isArray(root.model) ? modelData[root.textRole] : model[root.textRole])
-                    color: "#cfcfcf"
+                    font.pixelSize: 11
+                    color: root.currentIndex == index ? "#fff" : "#cfcfcf"
                 }
-                
+
                 MouseArea {
                     id: mouseArea
                     anchors.fill: parent
@@ -75,12 +92,12 @@ ComboBox {
 
                     onEntered: {
                         listItem.color = Qt.rgba(1, 1, 1, 0.05)
-                        itemLabel.scale = 1.2
+                        itemLabel.font.pixelSize = 13
                     }
 
                     onExited: {
                         listItem.color = Qt.rgba(0, 0, 0, 0)
-                        itemLabel.scale = 1
+                        itemLabel.font.pixelSize = 11
                     }
 
                     onClicked: {
