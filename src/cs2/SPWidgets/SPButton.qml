@@ -16,7 +16,8 @@ Button {
     }
 
     contentItem: RowLayout {
-        spacing: 8
+        Layout.margins: 2
+        spacing: 5
 
         Item {
             visible: root.checkable

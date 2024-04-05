@@ -5,7 +5,6 @@ import Painter 1.0
 import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 import "SPWidgets"
-import "shader.js" as Shader
 
 Rectangle {
     id: root
@@ -17,32 +16,187 @@ Rectangle {
         }
     }
 
-    property int shaderID: 0;
+    property var parameters: [
+        { parameter: "u_enable_live_preview",      key: "checked",      component: enableLivePreview },
+        { parameter: "u_enable_pbr_validation",    key: "checked",      component: enablePBRValidation },
+        { parameter: "u_pbr_limits",               key: "range",        component: pbrLimits },
+        { parameter: "weapon",                     key: "currentIndex", component: weaponBox },
+        { parameter: "u_finish_style",             key: "currentIndex", component: finishStyleBox },
+        { parameter: "u_wear_amount",              key: "value",        component: wearAmount },
+        { parameter: "u_tex_scale",                key: "value",        component: texureScale },
+        { parameter: "u_ignore_weapon_size_scale", key: "checked",      component: ignoreTextureSizeScale },
+        { parameter: "tex_rotation",               key: "range",        component: textureRotation },
+        { parameter: "tex_offset_x",               key: "range",        component: textureOffsetX },
+        { parameter: "tex_offset_y",               key: "range",        component: textureOffsetY },
+        { parameter: "u_col0",                     key: "arrayColor",   component: color0 },
+        { parameter: "u_col1",                     key: "arrayColor",   component: color1 },
+        { parameter: "u_col2",                     key: "arrayColor",   component: color2 },
+        { parameter: "u_col3",                     key: "arrayColor",   component: color3 },
+        { parameter: "wear_limits",                key: "range",        component: wearLimits },
+        { parameter: "u_use_pearl_mask",           key: "checked",      component: usePearlescentMask },
+        { parameter: "u_pearl_scale",              key: "value",        component: pearlescentScale },
+        { parameter: "u_use_roughness_tex",        key: "checked",      component: useRoughnessTexture },
+        { parameter: "u_paint_roughness",          key: "value",        component: paintRoughness },
+        { parameter: "u_use_normal_map",           key: "checked",      component: useNormalMap },
+        { parameter: "u_use_material_mask",        key: "checked",      component: useMaterialMask },
+        { parameter: "u_use_ao_tex",               key: "checked",      component: useAmbientOcclusion }
+    ]
 
     function displayShaderParameters(shaderId) {
         try {
-            root.shaderID = shaderId;
+            for (const param of root.parameters) {
+                param.component.key = param.key;
+                param.component.parameter = param.parameter;
+                if (param.parameter.startsWith("u_")) {
+                    param.component.connectShaderParameter(shaderId);
+                }
+            }
         }
         catch(e) {
-            alg.log.error(e.message);
+            alg.log.exception(e.message);
         }
+    }
+
+    function readShaderParameters() {
+        var params = [];
+
+        // first try to fetch the parameters saved inside the current opened project
+        if (alg.project.settings.contains("CS2WT")) {
+            params = alg.project.settings.value("CS2WT");
+
+        // if there's no parameters saved try to fetch them from the plugin settings
+        } else if (alg.settings.contains("CS2WT")) {
+            params = alg.settings.value("CS2WT");
+        }
+
+        for (let i = 0; i < params.length; i++) {
+            root.parameters[i].component.update(params[i].value);
+        }
+    }
+
+    function writeShaderParameters() {
+        var params = [];
+        for (const param of root.parameters) {
+            params.push({ parameter: param.parameter, value: param.component.control[param.key] })
+        }
+        alg.project.settings.setValue("CS2WT", params);
+        alg.settings.setValue("CS2WT", params);
+    }
+
+    function importFromEconitem(url) {
+        alg.log.warning(`Imported parameters from ${getFileName(url)}.econitem`);
+    }
+
+    function exportToEconitem(url) {
+        alg.log.warning(`Exported parameters to ${getFileName(url)}.econitem`);
+    }
+
+    function getFileName(url) {
+        return url.toString().split("/").pop().split(".")[0];
     }
 
     PainterPlugin {
         onComputationStatusChanged: {
-            var meshUrl = alg.project.lastImportedMeshUrl();
-            var meshName = meshUrl.split("/").pop().split(".")[0];
-            weaponModel.control.currentIndex = weaponModel.control.model.findIndex(weapon => weapon.value === meshName)
+            var meshName = getFileName(alg.project.lastImportedMeshUrl());
+
+            if (weaponBox.control.currentValue != meshName) {
+                weaponBox.control.currentIndex = weaponBox.control.model.findIndex(weapon => weapon.value === meshName);
+            }
+        }
+
+        Component.onCompleted: {
+            readShaderParameters();
+        }
+
+        onProjectAboutToSave: {
+            writeShaderParameters();
         }
     }
 
     ColumnLayout {
         id: mainLayout
-        width: parent.width
+        width: root.width
+
+    //     SPButton {
+    //         visible: false
+    //         text: "Save as defaults"
+
+    //         onClicked: {
+    //             var params = [];
+    //             for (const param of root.parameters) {
+    //                 params.push({ parameter: param.parameter, value: param.component.control[param.key] })
+    //             }
+    //             alg.settings.setValue("CS2WT", params);
+
+    //             alg.log.warning("The current settings have been saved as defaults for future projects.");
+    //         }
+    //     }
+
+
+        Item {
+            Layout.fillWidth: true
+            height: layout.height
+
+            RowLayout {
+                id: layout
+                width: parent.width
+                anchors.margins: 10
+                spacing: 10
+
+                SPButton {
+                    id: exportButton
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "Export to .econitem"
+                    icon.source: "icons/icon_export.png"
+                    icon.width: 18
+                    icon.height: 18
+
+                    onClicked: {
+                        fileDialog.mode = SPFileDialog.Mode.SaveFile
+                        fileDialog.title = "Export to .econitem"
+                        fileDialog.open()
+                    }
+                }
+
+                SPButton {
+                    id: importButton
+                    Layout.alignment: Qt.AlignHCenter
+                    text: "Import from .econitem"
+                    icon.source: "icons/icon_import.png"
+                    icon.width: 18
+                    icon.height: 18
+
+                    onClicked: {
+                        fileDialog.mode = SPFileDialog.Mode.OpenFile
+                        fileDialog.title = "Import from .econitem"
+                        fileDialog.open()
+                    }
+                }
+            }
+
+            SPFileDialog {
+                id: fileDialog
+                folder: "file:///C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Global Offensive\\content\\csgo"
+                nameFilters: ["EconItem files (*.econitem)"]
+
+                onAccepted: {
+                    fileDialog.folder = fileDialog.fileUrl;
+                    if (fileDialog.mode === SPFileDialog.Mode.SaveFile) {
+                        exportToEconitem(fileDialog.fileUrl)
+                    } else {
+                        importFromEconitem(fileDialog.fileUrl)
+                    }
+                }
+            }
+        }
+
+
+        SPSeparator {
+            Layout.fillWidth: true
+        }
 
         SPParameterGroup {
             Layout.fillWidth: true
-            shaderID: root.shaderID
             expandable: false
             padding: 10
             background: Rectangle {
@@ -56,8 +210,6 @@ Rectangle {
                 id: enableLivePreview
                 Layout.fillWidth: true
                 text: "Live Preview"
-                parameter: "u_enable_live_preview"
-                key: "checked"
                 resettable: false
                 SPButton {
                     checkable: true
@@ -69,8 +221,6 @@ Rectangle {
                 id: enablePBRValidation
                 Layout.fillWidth: true
                 text: "PBR Validation"
-                parameter: "u_enable_pbr_validation"
-                key: "checked"
                 resettable: false
                 SPButton {
                     checkable: true
@@ -103,11 +253,10 @@ Rectangle {
 
             SPParameterGroup {
                 Layout.fillWidth: true
-                shaderID: root.shaderID
                 text: "Common"
 
                 SPParameter {
-                    id: weaponModel
+                    id: weaponBox
                     text: "Weapon"
 
                     SPComboBox {
@@ -154,10 +303,8 @@ Rectangle {
                 }
 
                 SPParameter {
-                    id: finishStyle
+                    id: finishStyleBox
                     text: "Finish Style"
-                    parameter: "u_finish_style"
-                    key: "currentIndex"
 
                     SPComboBox {
                         model: [
@@ -179,8 +326,7 @@ Rectangle {
                 SPSeparator { }
 
                 SPParameter {
-                    parameter: "u_wear"
-                    key: "value"
+                    id: wearAmount
                     SPSlider {
                         text: "Wear Amount"
                         from: wearLimits.control.minValue
@@ -190,8 +336,7 @@ Rectangle {
                 }
 
                 SPParameter {
-                    parameter: "u_tex_scale"
-                    key: "value"
+                    id: texureScale
                     SPSlider {
                         text: "Texture Scale"
                         from: -10
@@ -200,8 +345,8 @@ Rectangle {
                 }
 
                 SPParameter {
+                    id: ignoreTextureSizeScale
                     text: "Ignore Weapon Size Scale:"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Yes" : "No"
@@ -211,10 +356,10 @@ Rectangle {
 
             SPParameterGroup {
                 Layout.fillWidth: true
-                shaderID: root.shaderID
                 text: "Texture Placement"
 
                 SPParameter {
+                    id: textureRotation
                     SPRangeSlider {
                         text: "Texture Rotation"
                         from: -360
@@ -225,6 +370,7 @@ Rectangle {
                 }
 
                 SPParameter {
+                    id: textureOffsetX
                     SPRangeSlider {
                         text: "Texture Offset X"
                         from: -1
@@ -235,6 +381,7 @@ Rectangle {
                 }
 
                 SPParameter {
+                    id: textureOffsetY
                     SPRangeSlider {
                         text: "Texture Offset Y"
                         from: -1
@@ -247,50 +394,43 @@ Rectangle {
 
             SPParameterGroup {
                 Layout.fillWidth: true
-                shaderID: root.shaderID
-                visible: finishStyle.control.currentIndex != 6
+                visible: finishStyleBox.control.currentIndex != 6
                 text: "Color"
 
                 SPParameter {
-                    text: finishStyle.control.currentIndex > 6 ? "Base Metal" : "Base Coat"
-                    parameter: "u_col0"
-                    key: "arrayColor"
+                    id: color0
+                    text: finishStyleBox.control.currentIndex > 6 ? "Base Metal" : "Base Coat"
                     SPColorButton { }
                 }
 
                 SPParameter {
-                    visible: finishStyle.control.currentIndex != 3
-                    text: finishStyle.control.currentIndex > 6 ? "Patina Tint" : "Red Channel"
-                    parameter: "u_col1"
-                    key: "arrayColor"
+                    id: color1
+                    visible: finishStyleBox.control.currentIndex != 3
+                    text: finishStyleBox.control.currentIndex > 6 ? "Patina Tint" : "Red Channel"
                     SPColorButton { }
                 }
 
                 SPParameter {
-                    visible: finishStyle.control.currentIndex != 3
-                    text: finishStyle.control.currentIndex > 6 ? "Patina Wear" : "Green Channel"
-                    parameter: "u_col2"
-                    key: "arrayColor"
+                    id: color2
+                    visible: finishStyleBox.control.currentIndex != 3
+                    text: finishStyleBox.control.currentIndex > 6 ? "Patina Wear" : "Green Channel"
                     SPColorButton { }
                 }
 
                 SPParameter {
-                    visible: finishStyle.control.currentIndex != 3
-                    text: finishStyle.control.currentIndex > 6 ? "Grime" : "Blue Channel"
-                    parameter: "u_col3"
-                    key: "arrayColor"
+                    id: color3
+                    visible: finishStyleBox.control.currentIndex != 3
+                    text: finishStyleBox.control.currentIndex > 6 ? "Grime" : "Blue Channel"
                     SPColorButton { }
                 }
             }
 
             SPParameterGroup {
                 Layout.fillWidth: true
-                shaderID: root.shaderID
                 text: "Effects"
 
                 SPParameter {
                     id: wearLimits
-
                     SPRangeSlider {
                         text: "Wear Limits"
                         from: 0
@@ -303,9 +443,8 @@ Rectangle {
                 SPSeparator { }
 
                 SPParameter {
+                    id: usePearlescentMask
                     text: "Pearlescent Mask"
-                    parameter: "u_use_pearl_mask"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Use" : "Do not use"
@@ -313,8 +452,7 @@ Rectangle {
                 }
 
                 SPParameter {
-                    parameter: "u_pearl_scale"
-                    key: "value"
+                    id: pearlescentScale
                     SPSlider {
                         text: "Pearlescent Scale"
                         from: -6
@@ -328,8 +466,6 @@ Rectangle {
                     id: useRoughnessTexture
                     property bool checked: true
                     text: "Roughness Texture"
-                    parameter: "u_use_roughness_tex"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Use" : "Do not use"
@@ -341,9 +477,8 @@ Rectangle {
                 }
                 
                 SPParameter {
+                    id: paintRoughness
                     visible: !useRoughnessTexture.checked
-                    parameter: "u_paint_roughness"
-                    key: "value"
                     SPSlider {
                         text: "Paint Roughness"
                         from: 0
@@ -354,14 +489,13 @@ Rectangle {
 
             SPParameterGroup {
                 Layout.fillWidth: true
-                shaderID: root.shaderID
+                
                 text: "Advanced"
                 toggled: false
 
                 SPParameter {
+                    id: useNormalMap
                     text: "Normal Map"
-                    parameter: "u_use_normal_map"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Use" : "Do not use"
@@ -369,9 +503,8 @@ Rectangle {
                 }
 
                 SPParameter {
+                    id: useMaterialMask
                     text: "Material Mask"
-                    parameter: "u_use_material_mask"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Use" : "Do not use"
@@ -379,9 +512,8 @@ Rectangle {
                 }
 
                 SPParameter {
+                    id: useAmbientOcclusion
                     text: "Ambient Occlusion"
-                    parameter: "u_use_ao_tex"
-                    key: "checked"
                     SPButton {
                         checkable: true
                         text: checked ? "Use" : "Do not use"

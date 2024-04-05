@@ -14,7 +14,7 @@ ColumnLayout {
         gradient: Gradient {
             GradientStop { position: 0; color: Qt.rgba(1, 1, 1, 0.05) }
             GradientStop { position: 20 / height; color: Qt.rgba(1, 1, 1, 0.05) }
-            GradientStop { position: 100 / height; color: Qt.rgba(0, 0, 0, 0) }
+            GradientStop { position: 150 / height; color: Qt.rgba(0, 0, 0, 0) }
         }
     }
 
@@ -30,7 +30,6 @@ ColumnLayout {
     property alias expandable: groupButton.visible
     property alias text: groupButton.text
     property alias tooltip: groupButton.tooltip
-    property int shaderID: 0
     property real padding: 5
 
     AlgToggleButton {
@@ -70,7 +69,6 @@ ColumnLayout {
                     child.Layout.fillWidth = true;
 
                     if (child.toString().indexOf("SPParameter") !== -1 && child.__separatorX !== 0) {
-                        child.shaderID = root.shaderID;
                         currentGroup.push(child);
                     } else if (currentGroup.length > 0) {
                         maxSeparatorXForGroup = 0;

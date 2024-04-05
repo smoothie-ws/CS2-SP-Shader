@@ -15,6 +15,7 @@ RowLayout {
     property alias to: control.to
     property alias minValue: control.first.value
     property alias maxValue: control.second.value
+    property var range: [minValue, maxValue]
     property alias stepSize: control.stepSize
     property int precision: 2
 
