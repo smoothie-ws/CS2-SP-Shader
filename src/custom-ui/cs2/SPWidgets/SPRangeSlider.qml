@@ -15,9 +15,9 @@ RowLayout {
     property alias to: control.to
     property alias minValue: control.first.value
     property alias maxValue: control.second.value
-    property var range: [minValue, maxValue]
     property alias stepSize: control.stepSize
-    property int precision: 2
+    property int precision: stepSize.toString().includes('.') ? stepSize.toString().split('.').pop().length : 0
+    property var range: [minValue, maxValue]
 
     ColumnLayout {
         spacing: 5
@@ -34,46 +34,20 @@ RowLayout {
             Row {
                 spacing: 10
 
-                AlgTextInput {
+                SPTextInput {
                     width: 40
-                    id: minValueText
                     text: parseFloat(root.minValue).toFixed(precision)
                     validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
                     horizontalAlignment: TextInput.AlignRight
-
-                    onActiveFocusChanged: {
-                        if (focus)
-                        {
-                            selectAll()
-                        }
-                        else {
-                            deselect()
-                        }
-                    }
-                    onEditingFinished: {
-                        root.minValue = parseFloat(text).toFixed(precision)
-                    }
+                    onEditingFinished: root.minValue = parseFloat(text)
                 }
 
-                AlgTextInput {
+                SPTextInput {
                     width: 40
-                    id: maxValueText
                     text: parseFloat(root.maxValue).toFixed(precision)
                     validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
                     horizontalAlignment: TextInput.AlignRight
-
-                    onActiveFocusChanged: {
-                        if (focus)
-                        {
-                            selectAll()
-                        }
-                        else {
-                            deselect()
-                        }
-                    }
-                    onEditingFinished: {
-                        root.maxValue = parseFloat(text).toFixed(precision)
-                    }
+                    onEditingFinished: root.maxValue = parseFloat(text)
                 }
             }
 

@@ -15,7 +15,7 @@ RowLayout {
     property alias to: control.to
     property alias value: control.value
     property alias stepSize: control.stepSize
-    property int precision: 2
+    property int precision: stepSize.toString().includes('.') ? stepSize.toString().split('.').pop().length : 0
 
     ColumnLayout {
         spacing: 5
@@ -29,13 +29,12 @@ RowLayout {
                 id: label
             }
 
-            AlgTextInput {
+            SPTextInput {
                 Layout.preferredWidth: 40
                 text: parseFloat(value).toFixed(precision)
                 validator: RegExpValidator { regExp: /^-?[0-9]*\.?[0-9]*$/ }
                 horizontalAlignment: TextInput.AlignRight
-                onActiveFocusChanged: focus ? selectAll() : deselect()
-                onEditingFinished: root.value = Math.max(root.from, Math.min(parseFloat(text).toFixed(root.precision), root.to))
+                onEditingFinished: root.value = parseFloat(text)
             }
         }
 
@@ -50,6 +49,7 @@ RowLayout {
                 id: control
                 Layout.fillWidth: true
                 snapMode: RangeSlider.SnapAlways
+                stepSize: 0.01
                 
                 handle: Item {
                     x: control.visualPosition * control.availableWidth

@@ -3,11 +3,12 @@ import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.3
 import Painter 1.0
 import AlgWidgets 2.0
-import "../shader.js" as Shader
+import "../cs2wt.mjs" as CS2WT
 
 Item {
     id: root
     implicitHeight: loader.height
+
     default property alias children: loader.sourceComponent
     property alias control: loader.item
     property alias text: label.text
@@ -21,7 +22,7 @@ Item {
 
     function connectShaderParameter(shaderId) {
         if (loader.status == Loader.Ready && root.key !== "" && root.parameter !== "") {
-            Shader.connect(root.control, root.key, alg.shaders.parameter(shaderId, root.parameter));
+            CS2WT.Shader.connect(root.control, root.key, alg.shaders.parameter(shaderId, root.parameter));
         }
     }
 
@@ -49,7 +50,7 @@ Item {
         x: root.width - width
         y: loader.height / 2 - height / 2
         enabled: root.defaultValue != loader.item[key]
-        icon.source: "../icons/icon_cycle.png"
+        icon.source: "./icons/icon_cycle.png"
         icon.width: 14
         icon.height: 14
         background: null

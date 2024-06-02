@@ -4,7 +4,7 @@ import AlgWidgets.Style 2.0
 
 ScrollBar {
     id: root
-    hoverEnabled: true
+    opacity: hovered ? 1.0 : 0.5
     topPadding: 0
     bottomPadding: 0
     leftPadding: 0

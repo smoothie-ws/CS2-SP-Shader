@@ -1,10 +1,12 @@
 import QtQuick 2.7
 import QtQuick.Layouts 1.3
+import Qt.labs.platform 1.1
 import QtQuick.Controls 2.7
 import Painter 1.0
 import AlgWidgets 2.0
 import AlgWidgets.Style 2.0
 import "SPWidgets"
+import "utils.mjs" as Utils
 
 Rectangle {
     id: root
@@ -53,7 +55,7 @@ Rectangle {
             }
         }
         catch(e) {
-            alg.log.exception(e.message);
+            alg.log.error(e.message);
         }
     }
 
@@ -83,29 +85,17 @@ Rectangle {
         alg.settings.setValue("CS2WT", params);
     }
 
-    function importFromEconitem(url) {
-        alg.log.warning(`Imported parameters from ${getFileName(url)}.econitem`);
-    }
-
-    function exportToEconitem(url) {
-        alg.log.warning(`Exported parameters to ${getFileName(url)}.econitem`);
-    }
-
-    function getFileName(url) {
-        return url.toString().split("/").pop().split(".")[0];
+    Component.onCompleted: {
+        readShaderParameters();
     }
 
     PainterPlugin {
         onComputationStatusChanged: {
-            var meshName = getFileName(alg.project.lastImportedMeshUrl());
+            var meshName = Utils.FileUtils.getFileName(alg.project.lastImportedMeshUrl());
 
             if (weaponBox.control.currentValue != meshName) {
                 weaponBox.control.currentIndex = weaponBox.control.model.findIndex(weapon => weapon.value === meshName);
             }
-        }
-
-        Component.onCompleted: {
-            readShaderParameters();
         }
 
         onProjectAboutToSave: {
@@ -116,22 +106,6 @@ Rectangle {
     ColumnLayout {
         id: mainLayout
         width: root.width
-
-    //     SPButton {
-    //         visible: false
-    //         text: "Save as defaults"
-
-    //         onClicked: {
-    //             var params = [];
-    //             for (const param of root.parameters) {
-    //                 params.push({ parameter: param.parameter, value: param.component.control[param.key] })
-    //             }
-    //             alg.settings.setValue("CS2WT", params);
-
-    //             alg.log.warning("The current settings have been saved as defaults for future projects.");
-    //         }
-    //     }
-
 
         Item {
             Layout.fillWidth: true
@@ -147,12 +121,12 @@ Rectangle {
                     id: exportButton
                     Layout.alignment: Qt.AlignHCenter
                     text: "Export to .econitem"
-                    icon.source: "icons/icon_export.png"
+                    icon.source: "./SPWidgets/icons/icon_export.png"
                     icon.width: 18
                     icon.height: 18
 
                     onClicked: {
-                        fileDialog.mode = SPFileDialog.Mode.SaveFile
+                        fileDialog.mode = FileDialog.SaveFile
                         fileDialog.title = "Export to .econitem"
                         fileDialog.open()
                     }
@@ -162,12 +136,12 @@ Rectangle {
                     id: importButton
                     Layout.alignment: Qt.AlignHCenter
                     text: "Import from .econitem"
-                    icon.source: "icons/icon_import.png"
+                    icon.source: "./SPWidgets/icons/icon_import.png"
                     icon.width: 18
                     icon.height: 18
 
                     onClicked: {
-                        fileDialog.mode = SPFileDialog.Mode.OpenFile
+                        fileDialog.mode = FileDialog.OpenFile
                         fileDialog.title = "Import from .econitem"
                         fileDialog.open()
                     }
@@ -176,20 +150,18 @@ Rectangle {
 
             SPFileDialog {
                 id: fileDialog
-                folder: "file:///C:\\Program Files (x86)\\Steam\\steamapps\\common\\Counter-Strike Global Offensive\\content\\csgo"
+                folder: Qt.resolvedUrl("file:///C:/Program Files (x86)/Steam/steamapps/common/Counter-Strike Global Offensive/content/csgo")
                 nameFilters: ["EconItem files (*.econitem)"]
 
                 onAccepted: {
-                    fileDialog.folder = fileDialog.fileUrl;
-                    if (fileDialog.mode === SPFileDialog.Mode.SaveFile) {
-                        exportToEconitem(fileDialog.fileUrl)
+                    if (mode === SPFileDialog.SaveFile) {
+                        Utils.EconItem.exportTo(fileUrl)
                     } else {
-                        importFromEconitem(fileDialog.fileUrl)
+                        Utils.EconItem.importFrom(fileUrl)
                     }
                 }
             }
         }
-
 
         SPSeparator {
             Layout.fillWidth: true
@@ -230,11 +202,10 @@ Rectangle {
 
             SPParameter {
                 id: pbrLimits
-                visible: enablePBRValidation.control.checked
+                enabled: enablePBRValidation.control.checked
                 SPRangeSlider {
                     text: "PBR Limits"
                     stepSize: 1
-                    precision: 0
                     from: 0
                     to: 255
                 }
@@ -329,8 +300,8 @@ Rectangle {
                     id: wearAmount
                     SPSlider {
                         text: "Wear Amount"
-                        from: wearLimits.control.minValue
-                        to: wearLimits.control.maxValue
+                        from: wearLimits.control.minValue.toFixed(precision)
+                        to: wearLimits.control.maxValue.toFixed(precision)
                         stepSize: 0.01
                     }
                 }
@@ -437,6 +408,7 @@ Rectangle {
                         to: 1
                         minValue: 0
                         maxValue: 1
+                        stepSize: 0.01
                     }
                 }
 
